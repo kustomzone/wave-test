@@ -1,3 +1,4 @@
+
 'use client';
 
 import { fetchWavePosts, WavePost } from '@/services/wave-data';
@@ -7,6 +8,8 @@ import {summarizeWave} from "@/ai/flows/summarize-wave";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { ThemeToggle } from '@/components/theme-toggle';
+
 
 async function getWavePosts(): Promise<WavePost[]> {
   // Replace with your actual JSON URL
@@ -28,7 +31,10 @@ export default function Home() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Wave Replicator</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Wave Replicator</h1>
+        <ThemeToggle />
+      </div>
       <div className="grid gap-4">
         {wavePosts.map((post) => (
           <WavePostCard key={post.id} post={post} />
@@ -116,6 +122,5 @@ const WavePostCard: React.FC<WavePostCardProps> = ({post}) => {
         </Card>
     );
 };
-
 
     
