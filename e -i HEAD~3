@@ -1,0 +1,37 @@
+[33mcommit 10fe38517afd0af7729586f9d07dd7f50d721411[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m
+Author: Andrew Kidoo <I7redd@gmail.com>
+Date:   Fri Apr 11 10:04:16 2025 +0000
+
+    init
+
+[33mcommit 27e960c58de1370e9df4fe301466190016140ed6[m
+Author: Andrew Kidoo <I7redd@gmail.com>
+Date:   Fri Apr 11 09:03:48 2025 +0000
+
+    I see this error with the app, reported by NextJS, please fix it. The error is reported as HTML but presented visually to the user).
+    
+    A > before the line number in the error source usually indicates the line of interest:
+    
+    > ./src/app/page.tsx:3:10
+    > Ecmascript file had an error
+    >   1 | import { fetchWavePosts, WavePost } from '@/services/wave-data';
+    >   2 | import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+    > > 3 | import { useEffect, useState } from 'react';
+    >     |          ^^^^^^^^^
+    >   4 | import {summarizeWave} from "@/ai/flows/summarize-wave";
+    >   5 | import { Button } from '@/components/ui/button';
+    >   6 | import { Input } from '@/components/ui/input';
+    >
+    > You're importing a component that needs `useEffect`. This React hook only works in a client component. To fix, mark the file (or its parent) with the `"use client"` directive.
+    >
+    >  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+    >
+    >
+    >
+    >
+
+[33mcommit 0d8807e5a721f5d4b4b7edf7727871d099c1f7a6[m
+Author: Your Name <you@example.com>
+Date:   Wed Apr 9 01:43:38 2025 +0000
+
+    initial scaffold
