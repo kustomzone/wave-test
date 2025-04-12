@@ -2,7 +2,7 @@
 
 import { fetchWavePosts, WavePost, fetchLocalComments } from '@/services/wave-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {summarizeWave} from "@/ai/flows/summarize-wave";
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -53,12 +53,42 @@ export default function Home() {
     return comment?.actor?.displayName || 'Unknown Author';
   };
 
+    const fetchLocalCommentsFromFile = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) {
+            console.log("No file selected");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const text = e.target?.result;
+            if (typeof text === 'string') {
+                try {
+                    const json = JSON.parse(text);
+                    setComments(json.comments);
+                } catch (e) {
+                    console.error("Error parsing JSON", e);
+                    alert("Failed to parse JSON from file.");
+                }
+            }
+        };
+        reader.readAsText(file);
+    }, [setComments]);
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Wave Replicator</h1>
         <ThemeToggle />
       </div>
+        <input
+            type="file"
+            id="commentFile"
+            name="commentFile"
+            accept=".json"
+            onChange={fetchLocalCommentsFromFile}
+        />
       <div className="grid gap-4">
         {wavePosts.map((post) => (
           <WavePostCard
