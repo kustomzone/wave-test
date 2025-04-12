@@ -1,24 +1,23 @@
-
 'use client';
 
-import { fetchWavePosts, WavePost } from '@/services/wave-data';
+import { fetchWavePosts, WavePost, fetchLocalComments } from '@/services/wave-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
 import {summarizeWave} from "@/ai/flows/summarize-wave";
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ThemeToggle } from '@/components/theme-toggle';
+import {Comment} from "@/services/wave-data";
 
 
 async function getWavePosts(): Promise<WavePost[]> {
-  // Replace with your actual JSON URL
-  const wavePosts = await fetchWavePosts('https://example.com/wave-data.json');
+  const wavePosts = await fetchWavePosts('/wave-data.json');
   return wavePosts;
 }
 
 export default function Home() {
   const [wavePosts, setWavePosts] = useState<WavePost[]>([]);
+  const [comments, setComments] = useState<Record<string, any> | null>(null);
 
   useEffect(() => {
     const loadWavePosts = async () => {
@@ -29,6 +28,31 @@ export default function Home() {
     loadWavePosts();
   }, []);
 
+  useEffect(() => {
+    const loadComments = async () => {
+      const fetchedComments = await fetchLocalComments('/comments.json');
+      setComments(fetchedComments.comments);
+    };
+
+    loadComments();
+  }, []);
+
+  const getCommentText = (commentId: string) => {
+    if (!comments) return 'Loading...';
+    if (!comments[commentId]) return 'Comment not found';
+
+    const comment = Object.values(comments[commentId])[0] as any;
+    return comment?.object?.content || 'No comment content';
+  };
+
+  const getCommentAuthor = (commentId: string) => {
+    if (!comments) return 'Loading...';
+    if (!comments[commentId]) return 'Comment not found';
+
+    const comment = Object.values(comments[commentId])[0] as any;
+    return comment?.actor?.displayName || 'Unknown Author';
+  };
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
@@ -37,23 +61,43 @@ export default function Home() {
       </div>
       <div className="grid gap-4">
         {wavePosts.map((post) => (
-          <WavePostCard key={post.id} post={post} />
+          <WavePostCard
+            key={post.id}
+            post={post}
+            getCommentText={getCommentText}
+            getCommentAuthor={getCommentAuthor}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-
 interface WavePostCardProps {
     post: WavePost;
+    getCommentText: (commentId: string) => string;
+    getCommentAuthor: (commentId: string) => string;
 }
 
-const WavePostCard: React.FC<WavePostCardProps> = ({post}) => {
+const WavePostCard: React.FC<WavePostCardProps> = ({ post, getCommentText, getCommentAuthor }) => {
     const [summary, setSummary] = useState<string | null>(null);
     const [isSummarizing, setIsSummarizing] = useState(false);
     const [commentText, setCommentText] = useState('');
-    const [comments, setComments] = useState(post.comments);
+    const [localComments, setLocalComments] = useState<Comment[]>([]);
+
+    useEffect(() => {
+      if (post.comments) {
+          const initialComments: Comment[] = Object.keys(post.comments).map(key => {
+              const comment = Object.values(post.comments[key])[0] as any;
+              return {
+                  id: comment.id,
+                  author: comment.actor.displayName,
+                  text: comment.object.content,
+              };
+          });
+          setLocalComments(initialComments);
+      }
+  }, [post.comments]);
 
     const handleSummarize = async () => {
         setIsSummarizing(true);
@@ -75,11 +119,11 @@ const WavePostCard: React.FC<WavePostCardProps> = ({post}) => {
                 author: 'CurrentUser', // Replace with actual user
                 text: commentText,
             };
-            setComments([...comments, newComment]);
+            setLocalComments([...localComments, newComment]);
             setCommentText(''); // Clear the input
         }
     };
-  
+
     return (
         <Card>
             <CardHeader>
@@ -102,7 +146,7 @@ const WavePostCard: React.FC<WavePostCardProps> = ({post}) => {
             <CardContent>
                 <p>{post.content}</p>
                 <h3 className="text-lg font-semibold mt-2">Comments</h3>
-                {comments.map((comment) => (
+                {localComments.map((comment) => (
                     <div key={comment.id} className="mb-2">
                         <p className="font-bold">{comment.author}:</p>
                         <p>{comment.text}</p>
@@ -122,5 +166,3 @@ const WavePostCard: React.FC<WavePostCardProps> = ({post}) => {
         </Card>
     );
 };
-
-    

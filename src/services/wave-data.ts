@@ -1,3 +1,5 @@
+'use server';
+
 /**
  * Represents a Google Wave post.
  */
@@ -17,7 +19,7 @@ export interface WavePost {
   /**
    * The comments associated with the wave post.
    */
-  comments: Comment[];
+  comments: Record<string, any>;
 }
 
 /**
@@ -45,20 +47,13 @@ export interface Comment {
  * @returns A promise that resolves to an array of WavePost objects.
  */
 export async function fetchWavePosts(url: string): Promise<WavePost[]> {
-  // TODO: Implement this by calling an API.
+  const wavePostsResponse = await fetch(url);
+  const wavePostsJson = await wavePostsResponse.json();
+  return wavePostsJson;
+}
 
-  return [
-    {
-      id: '1',
-      title: 'Sample Wave Post',
-      content: 'This is a sample wave post content.',
-      comments: [
-        {
-          id: '1',
-          author: 'John Doe',
-          text: 'Great post!'
-        }
-      ]
-    }
-  ];
+export async function fetchLocalComments(url: string) {
+  const commentsResponse = await fetch(url);
+  const commentsJson = await commentsResponse.json();
+  return commentsJson;
 }
