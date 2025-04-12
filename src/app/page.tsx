@@ -98,7 +98,7 @@ export default function Home() {
                     htmlFor="local-data"
                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                    Use Local Wave Data
+                    {useLocalData ? "Local Wave Data" : "Remote Wave Data"}
                 </label>
             </div>
       <div className="grid gap-4">
