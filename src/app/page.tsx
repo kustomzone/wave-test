@@ -8,25 +8,28 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ThemeToggle } from '@/components/theme-toggle';
 import {Comment} from "@/services/wave-data";
+import { Switch } from "@/components/ui/switch"
 
 
-async function getWavePosts(): Promise<WavePost[]> {
-  const wavePosts = await fetchWavePosts('/wave-data.json');
-  return wavePosts;
+async function getWavePosts(useLocal: boolean): Promise<WavePost[]> {
+    const url = useLocal ? '/local-wave-data.json' : '/wave-data.json';
+    const wavePosts = await fetchWavePosts(url);
+    return wavePosts;
 }
 
 export default function Home() {
   const [wavePosts, setWavePosts] = useState<WavePost[]>([]);
   const [comments, setComments] = useState<Record<string, any> | null>(null);
+    const [useLocalData, setUseLocalData] = useState(false);
 
   useEffect(() => {
     const loadWavePosts = async () => {
-      const posts = await getWavePosts();
+      const posts = await getWavePosts(useLocalData);
       setWavePosts(posts);
     };
 
     loadWavePosts();
-  }, []);
+  }, [useLocalData]);
 
   useEffect(() => {
     const loadComments = async () => {
@@ -89,6 +92,15 @@ export default function Home() {
             accept=".json"
             onChange={fetchLocalCommentsFromFile}
         />
+            <div className="flex items-center space-x-2">
+                <Switch id="local-data" checked={useLocalData} onCheckedChange={setUseLocalData} />
+                <label
+                    htmlFor="local-data"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                    Use Local Wave Data
+                </label>
+            </div>
       <div className="grid gap-4">
         {wavePosts.map((post) => (
           <WavePostCard
