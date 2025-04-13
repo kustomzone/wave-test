@@ -23,8 +23,26 @@ const logData = async (log: any) => {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-    } catch (e) {
+    } catch (e: any) {
         console.error("Error logging data:", e);
+      
+      // Include the error message and the JSON string in the log
+        const errorLog = {
+            type: 'logError',
+            message: e.message,
+            data: log,
+        };
+      
+        const errorLogString = JSON.stringify(errorLog, null, 2);
+        const errorBlob = new Blob([errorLogString], {type: 'application/json'});
+        const errorUrl = URL.createObjectURL(errorBlob);
+        const errorA = document.createElement('a');
+        errorA.href = errorUrl;
+        errorA.download = 'log.json';
+        document.body.appendChild(errorA);
+        errorA.click();
+        document.body.removeChild(errorA);
+        URL.revokeObjectURL(errorUrl);
     }
 };
 
