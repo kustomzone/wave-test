@@ -10,11 +10,33 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import {Comment} from "@/services/wave-data";
 import { Switch } from "@/components/ui/switch"
 
+// Function to log data to a local file
+const logData = async (log: any) => {
+    try {
+        const logString = JSON.stringify(log, null, 2);
+        const blob = new Blob([logString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'log.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error("Error logging data:", e);
+    }
+};
+
 
 async function getWavePosts(useLocal: boolean): Promise<WavePost[]> {
-    const url = useLocal ? '/local-wave-data.json' : '/wave-data.json';
-    const wavePosts = await fetchWavePosts(url);
-    return wavePosts;
+    const url = useLocal ? './local-wave-data.json' : './wave-data.json';
+  
+  // Log the wave posts URL
+  logData({ type: 'wavePosts', url });
+  
+  const wavePosts = await fetchWavePosts(url);
+  return wavePosts;
 }
 
 export default function Home() {
@@ -33,8 +55,11 @@ export default function Home() {
 
   useEffect(() => {
     const loadComments = async () => {
-      const fetchedComments = await fetchLocalComments('/comments.json');
+      const fetchedComments = await fetchLocalComments('./comments.json');
       setComments(fetchedComments.comments);
+
+       // Log the comments URL
+       logData({ type: 'comments', url: './comments.json' });
     };
 
     loadComments();
@@ -70,6 +95,8 @@ export default function Home() {
                 try {
                     const json = JSON.parse(text);
                     setComments(json.comments);
+                     // Log the file path
+                     logData({ type: 'commentsFile', path: file.path });
                 } catch (e) {
                     console.error("Error parsing JSON", e);
                     alert("Failed to parse JSON from file.");
